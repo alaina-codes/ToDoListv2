@@ -13,19 +13,39 @@ app.use(bodyParser.urlencoded({
 }));
 app.use(express.static('public'));
 
-mongoose.connect('mongodb://localhost:27017/todolistDB', {useNewUrlParser: true});
+mongoose.connect('mongodb://localhost:27017/todolistDB', {
+    useNewUrlParser: true
+});
 
 const itemsSchema = {
     name: String
 };
 const Item = mongoose.model('item', itemsSchema);
 
-app.get('/', function (req, res) {
-    res.render('list', {
-        listTitle: "Today",
-        newListItems: items
-    });
+const item1 = new Item({
+    name: "Welcome to your to do list!"
+});
+const item2 = new Item({
+    name: "Hit the + button to add a new to do list item."
+});
+const item3 = new Item({
+    name: "Hit the checkbox to delete an item!"
+});
 
+const defaultItems = [item1, item2, item3];
+Item.insertMany(defaultItems, function (err) {
+    if (err) {
+        console.log(err);
+    };
+})
+
+app.get('/', function (req, res) {
+    Item.find({}, function (err, foundItems) {
+        res.render('list', {
+            listTitle: "Today",
+            newListItems: foundItems
+        });
+    });
 });
 
 app.post('/', function (req, res) {
